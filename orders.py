@@ -3,6 +3,7 @@ import uuid
 import math
 import random
 import logging
+import argparse
 import traceback
 import secret_api
 import typing as t
@@ -214,14 +215,23 @@ def process_request(req: Request, client: binan.Client) -> CreationStatus:
 
 if __name__ == "__main__":
     logger.setLevel(logging.INFO)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--symbol', type=str, help='Market pair', default="ETHUSDT")
+    parser.add_argument('--volume', type=float, help='Volume in USDT', default=100.)
+    parser.add_argument('--amountDif', type=float, help='USDT range within which the volume is randomly selected in both upward and downward directions.', default=1.)
+    parser.add_argument('--number', type=int, help='Number of orders', default=2)
+    parser.add_argument('--side', type=str, help='SELL or BUY', default=Side.SELL)
+    parser.add_argument('--priceMin', type=float, help='Min price range.', default=1908 - 5)
+    parser.add_argument('--priceMax', type=float, help='Max price range.', default=1908 + 5)
+    args = parser.parse_args()
 
     client = binan.Client(KEY, SECRET, testnet=True)
-    request: Request = Request(symbol='ETHUSDT',
-                               usd_vol=100, # "volume"
-                               usd_diff=1, #"number"
-                               splits=2, # "number"
-                               side=Side.SELL,
-                               min_price=1908 - 5,
-                               max_price=1908 + 5)
+    request: Request = Request(symbol=args.symbol, # 'ETHUSDT'
+                               usd_vol=args.volume, # 100.
+                               usd_diff=args.amountDif, # 1.
+                               splits=args.number, # 2
+                               side=args.side, # Side.SELL
+                               min_price=args.priceMin, # 1908 - 5,
+                               max_price=args.priceMax) # 1908 + 5
 
     process_request(request, client)
